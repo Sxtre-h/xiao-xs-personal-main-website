@@ -38,39 +38,23 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
     }
 
     /**
+     * 暂时弃用
      * 通过knife4j生成接口文档
      * @return
      */
     @Bean
-    public Docket docketAdmin() {
+    public Docket docketUserManage() {
         log.info("自动配置Api文档");
         ApiInfo apiInfo = new ApiInfoBuilder()
                 .title("Web接口文档")
-                .version("2.0")
+                .version("1.0")
                 .description("Web项目接口文档")
                 .build();
         Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .groupName("管理端接口")
+                .groupName("用户管理接口")
                 .apiInfo(apiInfo)
                 .select()
-                .apis(RequestHandlerSelectors.basePackage("com.sxtreh.controller.admin"))
-                .paths(PathSelectors.any())
-                .build();
-        return docket;
-    }
-    @Bean
-    public Docket docketUser() {
-        log.info("自动配置Api文档");
-        ApiInfo apiInfo = new ApiInfoBuilder()
-                .title("Web接口文档")
-                .version("2.0")
-                .description("Web项目接口文档")
-                .build();
-        Docket docket = new Docket(DocumentationType.SWAGGER_2)
-                .groupName("用户端接口")
-                .apiInfo(apiInfo)
-                .select()
-                .apis(RequestHandlerSelectors.basePackage("com.sxtreh.controller.user"))
+                .apis(RequestHandlerSelectors.basePackage("com.sxtreh.controller"))
                 .paths(PathSelectors.any())
                 .build();
         return docket;

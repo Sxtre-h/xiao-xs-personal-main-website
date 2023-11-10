@@ -41,7 +41,7 @@ public class UserController {
      * @param userDTO
      * @return
      */
-    @ApiOperation(value = "用户注册")
+    @ApiOperation("用户注册")
     @PostMapping("/register")
     public Result<UserVO> register(@RequestBody UserDTO userDTO){
         if(userDTO.getLoginName() == null || userDTO.getUserName() == null || userDTO.getPassword() == null){
@@ -58,7 +58,7 @@ public class UserController {
      * @param userDTO
      * @return
      */
-    @ApiOperation(value = "用户登录")
+    @ApiOperation("用户登录")
     @PostMapping("/login")
     public Result<UserVO> login(@RequestBody UserDTO userDTO){
         if(userDTO.getLoginName() == null || userDTO.getPassword() == null){
@@ -91,7 +91,7 @@ public class UserController {
      * @return
      */
     @RequireLogin
-    @ApiOperation(value = "用户登出")
+    @ApiOperation("用户登出")
     @PostMapping("/logout")
     public Result<UserVO> logout(){
         return Result.success();
@@ -102,7 +102,7 @@ public class UserController {
      * @return
      */
     @RequireLogin
-    @ApiOperation(value = "查找当前登录用户信息")
+    @ApiOperation("查找当前登录用户信息")
     @GetMapping("/info")
     public Result<UserVO> info(){
         User user = userService.info();
