@@ -1,41 +1,35 @@
 package com.sxtreh.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDateTime;
-
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_user_info")
-public class User {
+@TableName("t_note")
+public class Note {
     @TableId(value = "id", type = IdType.AUTO)
     Long id;
 
-    String userName;
+    Long userId;
 
-    String loginName;
+    Long catalogId;
 
-    String password;
+    String noteName;
 
-    //简介，如果字段为空或者不存在，表中字段会写入空
-    @TableField(updateStrategy = FieldStrategy.IGNORED)
-    String profile;
+    String noteBody;
 
-    //头像url
-    String avatar;
-
-    //账号状态
     String status;
 
-    Boolean isAdmin;
+    Integer noteOrder;
 
     //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime gmtCreate;

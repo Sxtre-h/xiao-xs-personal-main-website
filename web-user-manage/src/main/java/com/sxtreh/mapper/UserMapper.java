@@ -10,6 +10,7 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("select * from t_user_info where login_name = #{loginName}")
+    @Select("select id, user_name, login_name, password, profile, avatar, status, is_admin, gmt_create, gmt_update from t_user_info " +
+            "where login_name = #{loginName}")
     User selectByLoginName(String loginName);
 }

@@ -124,6 +124,10 @@ public class UserController {
     @PutMapping("/update")
     public Result<UserVO> updateUser(@RequestBody UserDTO userDTO){
         //User中设置了部分字段即使为空也会更新，所以不需要判断userDTO中是否所有字段都为空
+        //如果没有传密码过来，则不更新密码//临时解决办法，后期通过校验的方式判断
+        if(userDTO.getPassword().equals("")){
+            userDTO.setPassword(null);
+        }
         userService.updateUser(userDTO);
         return Result.success();
     }

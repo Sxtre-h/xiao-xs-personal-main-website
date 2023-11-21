@@ -11,5 +11,12 @@ public class StatusConstant {
     public static final String BANNED = "0";
     public static final String NORMAL = "1";
 
+    //笔记共享状态
+
+    public static final String DELETED = "0";
+    public static final String UNSHARED = "1";
+    public static final String SHARED = "2";
+
+
 
 }

@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public Result exceptionHandler(HttpMessageNotReadableException ex){
         log.info("你忘了写请求参数！：" + ex.getMessage());
-        return Result.error("你忘了写请求参数！：" + ex.getMessage());
+        return Result.error("你忘了写请求参数或者参数有语法错误！：" + ex.getMessage());
     }
 
     //TODO 将后端异常（如AspectException）和BaseException分开，不要向前端返回异常信息
