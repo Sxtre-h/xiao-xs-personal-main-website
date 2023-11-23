@@ -18,6 +18,12 @@ spring:
     port: ${sxtreh.redis.port}
     database: ${sxtreh.redis.database}
 
+  servlet:
+    multipart:
+      max-file-size: 10000MB
+      max-request-size: 10000MB
+
+
 mybatis-plus:
   #mapper配置文件
   mapper-locations: classpath:mapper/*.xml

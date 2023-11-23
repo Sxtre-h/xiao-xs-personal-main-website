@@ -1,6 +1,7 @@
 package com.sxtreh;
 
 import com.sxtreh.entity.User;
+import com.sxtreh.enumeration.FileType;
 import com.sxtreh.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,5 +19,10 @@ public class MPTest {
                                         .password("dawdawdawd")
                                                 .build();
         userMapper.insert(user);
+    }
+
+    @Test
+    public void t2(){
+//        System.out.println(FileType.CATALOG.getClass());
     }
 }

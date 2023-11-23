@@ -33,4 +33,11 @@ public class UserVO {
     //用户通知信息
     String msg;
 
+    //用户网盘根目录ID
+    Long userNetDiskRootId;
+    //用户剩余网盘空间
+    Long userSpaceRemain;
+    //用户网盘总空间
+    Long userSpaceTotal;
+
 }

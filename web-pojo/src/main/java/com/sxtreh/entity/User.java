@@ -37,6 +37,13 @@ public class User {
 
     Boolean isAdmin;
 
+    //用户网盘根目录ID
+    Long userNetDiskRootId;
+    //用户剩余网盘空间
+    Long userSpaceRemain;
+    //用户网盘总空间
+    Long userSpaceTotal;
+
     //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime gmtCreate;
 

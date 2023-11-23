@@ -2,6 +2,7 @@ package com.sxtreh.constant;
 
 /**
  * 状态常量
+ * 设计不周，可使用枚举
  */
 public class StatusConstant {
     //是否管理员

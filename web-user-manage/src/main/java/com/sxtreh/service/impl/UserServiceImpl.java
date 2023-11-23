@@ -1,15 +1,19 @@
 package com.sxtreh.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sxtreh.constant.DataSizeConstant;
+import com.sxtreh.constant.FileTypeConstant;
 import com.sxtreh.constant.MessageConstant;
 import com.sxtreh.constant.StatusConstant;
 import com.sxtreh.context.BaseContext;
 import com.sxtreh.dto.UserDTO;
 import com.sxtreh.entity.User;
+import com.sxtreh.entity.UserFile;
 import com.sxtreh.exception.AccountAlreadyExistException;
 import com.sxtreh.exception.AccountBannedException;
 import com.sxtreh.exception.AccountNotFoundException;
 import com.sxtreh.exception.PasswordErrorException;
+import com.sxtreh.mapper.NetDiskMapper;
 import com.sxtreh.mapper.UserMapper;
 import com.sxtreh.service.UserService;
 import org.springframework.beans.BeanUtils;
@@ -22,6 +26,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private NetDiskMapper netDiskMapper;
+
     /**
      * 用户注册
      * @param userDTO
@@ -31,10 +38,27 @@ public class UserServiceImpl implements UserService {
         if(userMapper.selectByLoginName(userDTO.getLoginName()) != null){
             throw new AccountAlreadyExistException(MessageConstant.ALREADY_EXISTS);
         }
+        //创建用户
         User user = new User();
         BeanUtils.copyProperties(userDTO, user);
         user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
-        userMapper.insert(user);
+        //为用户分配网盘空间
+        user.setUserNetDiskRootId(0L);//临时分配一个空的目录ID
+        user.setUserSpaceRemain(DataSizeConstant._10GB);
+        user.setUserSpaceTotal(DataSizeConstant._10GB);
+        userMapper.insertAndGetId(user);
+        //为用户创建网盘根目录
+        UserFile userFile = UserFile.builder()
+                .userId(user.getId())
+                //将根目录的父目录id设置为用户的id
+                .filePid(user.getId())
+                .fileName(user.getUserName())
+                .fileType(FileTypeConstant.CATALOG)
+                .build();
+        netDiskMapper.insertAndGetId(userFile);
+        //将用户网盘根目录写入用户信息表
+        user.setUserNetDiskRootId(userFile.getId());
+        userMapper.updateById(user);
     }
 
     /**

@@ -38,7 +38,7 @@ public class AutoFillAspect {
         //获取方法名
         String name = signature.getMethod().getName();
         //非insert和非update直接返回
-        if (name != MethodNameConstant.INSERT && name != MethodNameConstant.UPDATE) {
+        if (!name.contains(MethodNameConstant.INSERT) && !name.contains(MethodNameConstant.UPDATE)) {
             return;
         }
         log.info("自动填充时间参数");
@@ -54,7 +54,7 @@ public class AutoFillAspect {
         try {
             Method setGmtCreate = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_GMT_CREATE, LocalDateTime.class);
             Method setGmtUpdate = entity.getClass().getDeclaredMethod(AutoFillConstant.SET_GMT_UPDATE, LocalDateTime.class);
-            if(name == MethodNameConstant.INSERT){
+            if(name.contains(MethodNameConstant.INSERT)){
                 setGmtCreate.invoke(entity, now);
             }
             setGmtUpdate.invoke(entity, now);

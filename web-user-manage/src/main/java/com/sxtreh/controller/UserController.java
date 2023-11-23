@@ -74,11 +74,14 @@ public class UserController {
                 jwtProperties.getUserTtl(),
                 claims);
 
-        //返回账号基本信息:头像、用户名、简介
+        //返回账号基本信息:头像、用户名、简介、网盘信息
         UserVO userVO = UserVO.builder()
                 .userName(user.getUserName())
                 .profile(user.getProfile())
                 .avatar(user.getAvatar())
+                .userNetDiskRootId(user.getUserNetDiskRootId())
+                .userSpaceRemain(user.getUserSpaceRemain())
+                .userSpaceTotal(user.getUserSpaceTotal())
                 .token(token)
                 .build();
 

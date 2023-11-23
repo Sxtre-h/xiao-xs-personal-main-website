@@ -98,5 +98,4 @@ public class NoteController {
         NoteVO noteVO =new NoteVO(notes.size(), notes);
         return Result.success(noteVO);
     }
-
 }
