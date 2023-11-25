@@ -1,6 +1,6 @@
 package com.sxtreh.exception;
 
-public class AspectException extends BaseException{
+public class AspectException extends ProcedureException {
     public AspectException() {
     }
     public AspectException(String msg) {

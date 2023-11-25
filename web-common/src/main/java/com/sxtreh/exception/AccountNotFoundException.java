@@ -1,6 +1,6 @@
 package com.sxtreh.exception;
 
-public class AccountNotFoundException extends BaseException{
+public class AccountNotFoundException extends RequestException {
     public AccountNotFoundException() {
     }
     public AccountNotFoundException(String msg) {

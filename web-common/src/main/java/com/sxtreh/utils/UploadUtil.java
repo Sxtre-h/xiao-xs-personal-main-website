@@ -1,9 +1,12 @@
 package com.sxtreh.utils;
 
 import com.sxtreh.constant.FileStorageLocationConstant;
+import com.sxtreh.constant.MessageConstant;
 import com.sxtreh.context.BaseContext;
+import com.sxtreh.exception.FileUploadErrorException;
 import com.sxtreh.result.Result;
 import com.sxtreh.result.UploadResult;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,9 +20,9 @@ import java.util.UUID;
 
 public class UploadUtil {
 
-
     /**
-     *分片上传文件到本地
+     * 分片上传文件到本地
+     *
      * @param fileId
      * @param storagePath
      * @param file
@@ -29,24 +32,22 @@ public class UploadUtil {
      * @throws Exception
      */
     public static UploadResult upload(Long fileId, String storagePath, MultipartFile file, Integer chunkIndex, Integer chunks) throws Exception {
-        //TODO redis 判断分片是否存在 ： 需要？ 顺序上传，一点出错都不会上传后面的片
         UploadResult uploadResult = new UploadResult();
         uploadResult.setCode(0);
         //分片上传文件
         //临时文件目录
         String tempDir = FileStorageLocationConstant.TEMP_PATH + BaseContext.getCurrentId() + fileId + "\\";
-
         File dir = new File(tempDir);
         if (!dir.exists()) {
             dir.mkdir();
         }
         String tempPathName = tempDir + chunkIndex.toString();
         file.transferTo(new File(tempPathName));
-        //最后一片上传后，合并文件
+        //文件数足够时，尝试合并
         String newFileName = UUID.randomUUID().toString();
         String fileUrl = storagePath + newFileName;
-        if (chunkIndex.equals(chunks)) {
-            File[] files = dir.listFiles();
+        File[] files = dir.listFiles();
+        if (files.length == chunks) {
             File targetFile = new File(fileUrl);
             RandomAccessFile writeFile = null;
             try {
@@ -61,8 +62,8 @@ public class UploadUtil {
                         while ((len = readFile.read(buf)) != -1) {
                             writeFile.write(buf, 0, len);
                         }
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                    } catch (Exception e) {
+                        throw new FileUploadErrorException(MessageConstant.UPLOAD_ERROR);
                     } finally {
                         if (readFile != null)
                             readFile.close();
@@ -72,8 +73,13 @@ public class UploadUtil {
                 uploadResult.setFileName(newFileName);
                 uploadResult.setFileUrl(fileUrl);
                 uploadResult.setFileSize(targetFile.length());
-            } catch (IOException e) {
-                throw new RuntimeException(e);
+                //全部写入后, 删除所有文件
+                for (File df : files) {
+                    df.delete();
+                }
+                dir.delete();
+            } catch (Exception e) {
+                throw new FileUploadErrorException(MessageConstant.UPLOAD_ERROR);
             } finally {
                 if (writeFile != null) {
                     writeFile.close();
@@ -81,5 +87,20 @@ public class UploadUtil {
             }
         }
         return uploadResult;
+    }
+    /**
+     * 清理临时文件
+     */
+    public static void cleanTempFile(Long userId, Long fileId){
+        String tempDir = FileStorageLocationConstant.TEMP_PATH + userId + fileId + "\\";
+        File dir = new File(tempDir);
+        if (!dir.exists()) {
+            return;
+        }
+        File[] files = dir.listFiles();
+        for (File df : files) {
+            df.delete();
+        }
+        dir.delete();
     }
 }

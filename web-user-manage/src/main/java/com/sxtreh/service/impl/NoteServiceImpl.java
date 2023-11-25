@@ -1,12 +1,13 @@
 package com.sxtreh.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sxtreh.constant.MessageConstant;
 import com.sxtreh.constant.StatusConstant;
 import com.sxtreh.context.BaseContext;
-import com.sxtreh.dto.NoteCatalogDTO;
 import com.sxtreh.dto.NoteDTO;
 import com.sxtreh.entity.Note;
 import com.sxtreh.entity.NoteCatalog;
+import com.sxtreh.exception.DataNotExistException;
 import com.sxtreh.mapper.NoteCatalogMapper;
 import com.sxtreh.mapper.NoteMapper;
 import com.sxtreh.service.NoteService;
@@ -20,11 +21,19 @@ import java.util.List;
 public class NoteServiceImpl implements NoteService {
     @Autowired
     private NoteMapper noteMapper;
+    @Autowired
+    private NoteCatalogMapper noteCatalogMapper;
 
     @Override
     public void saveNote(NoteDTO noteDTO) {
         Note note = new Note();
         BeanUtils.copyProperties(noteDTO, note);
+
+        //如果插入的目录不存在或者不是自己的目录，请求非法！非法请求也可当作不存在处理
+        NoteCatalog noteCatalog = noteCatalogMapper.selectById(note.getCatalogId());
+        if (noteCatalog == null || noteCatalog.getUserId() != BaseContext.getCurrentId()) {
+            throw new DataNotExistException(MessageConstant.DATA_NOT_EXIST);
+        }
 
         note.setUserId(BaseContext.getCurrentId());
         note.setStatus(StatusConstant.UNSHARED);
@@ -35,7 +44,10 @@ public class NoteServiceImpl implements NoteService {
 
     @Override
     public void deleteNote(Long noteId) {
-        noteMapper.deleteById(noteId);
+        LambdaQueryWrapper<Note> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Note::getId, noteId)
+                .eq(Note::getUserId, BaseContext.getCurrentId());
+        noteMapper.delete(queryWrapper);
     }
 
     @Override
@@ -44,7 +56,8 @@ public class NoteServiceImpl implements NoteService {
         BeanUtils.copyProperties(noteDTO, note);
         //TODO 目录排序
         LambdaQueryWrapper<Note> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Note::getId, noteDTO.getNoteId());
+        queryWrapper.eq(Note::getId, noteDTO.getNoteId())
+                .eq(Note::getUserId, BaseContext.getCurrentId());
         noteMapper.update(note, queryWrapper);
     }
 
@@ -58,8 +71,8 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public List<Note> listNoteByCatalogId(Integer catalogId) {
         LambdaQueryWrapper<Note> queryWrapper = new LambdaQueryWrapper<>();
-        queryWrapper.eq(Note::getUserId, BaseContext.getCurrentId())
-                .eq(Note::getCatalogId, catalogId);
+        queryWrapper.eq(Note::getCatalogId, catalogId)
+                .eq(Note::getUserId, BaseContext.getCurrentId());
         return noteMapper.selectList(queryWrapper);
     }
 }

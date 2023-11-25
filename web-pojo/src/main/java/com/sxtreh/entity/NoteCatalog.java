@@ -20,7 +20,7 @@ public class NoteCatalog {
 
     Long userId;
 
-    String catalogLevel;
+    Integer catalogLevel;
 
     String catalogName;
 

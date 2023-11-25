@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class NoteCatalogDTO {
     Long catalogId;
 
-    String catalogLevel;
+    Integer catalogLevel;
 
     String catalogName;
 

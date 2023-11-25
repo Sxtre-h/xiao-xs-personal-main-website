@@ -1,7 +1,8 @@
 package com.sxtreh.handler;
 
 import com.sxtreh.constant.MessageConstant;
-import com.sxtreh.exception.BaseException;
+import com.sxtreh.exception.ProcedureException;
+import com.sxtreh.exception.RequestException;
 import com.sxtreh.result.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,24 +15,40 @@ import java.sql.SQLIntegrityConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
     /**
-     * 程序异常处理
-     * @param baseException
+     * 前端请求异常处理，包括参数错误，访问非法等
+     * @param requestException
      * @return
      */
     @ExceptionHandler
-    public Result exceptionHandler(BaseException baseException){
-        log.info(baseException.getMessage());
-        return Result.error(baseException.getMessage());
+    public Result exceptionHandler(RequestException requestException){
+        log.info(requestException.getMessage());
+        return Result.error(requestException.getMessage());
     }
+
+    /**
+     *后端程序出现异常
+     * @param procedureException
+     * @return
+     */
+    @ExceptionHandler
+    public Result exceptionHandler(ProcedureException procedureException){
+        log.info(procedureException.getMessage());
+        return Result.error(MessageConstant.PROCEDURE_ERROR);
+    }
+
+    /**
+     * HTTP请求异常，指访问接口的方式不对
+     * @param ex
+     * @return
+     */
     @ExceptionHandler
     public Result exceptionHandler(HttpMessageNotReadableException ex){
         log.info("你忘了写请求参数！：" + ex.getMessage());
         return Result.error("你忘了写请求参数或者参数有语法错误！：" + ex.getMessage());
     }
 
-    //TODO 将后端异常（如AspectException）和BaseException分开，不要向前端返回异常信息
     /**
-     * 数据库异常异常
+     * 数据库异常
      * @param ex
      * @return
      */

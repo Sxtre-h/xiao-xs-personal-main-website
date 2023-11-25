@@ -1,11 +1,11 @@
 package com.sxtreh.controller;
 
+import com.sxtreh.annotation.ParameterCheck;
 import com.sxtreh.annotation.RequireLogin;
 import com.sxtreh.constant.JwtClaimsConstant;
-import com.sxtreh.constant.MessageConstant;
 import com.sxtreh.dto.UserDTO;
 import com.sxtreh.entity.User;
-import com.sxtreh.exception.ParameterMissingException;
+import com.sxtreh.enumeration.ParameterRuleType;
 import com.sxtreh.properties.JwtProperties;
 import com.sxtreh.result.Result;
 import com.sxtreh.service.UserService;
@@ -24,7 +24,6 @@ import java.util.Map;
 /**
  * 用户管理控制
  * 注册、登录、登出、查询信息、接收通知、申请邀请码
- * TODO 参数格式校验,用正则表达式
  */
 @Slf4j
 @Api(tags = "用户管理接口")
@@ -41,12 +40,14 @@ public class UserController {
      * @param userDTO
      * @return
      */
+
+    @ParameterCheck(rule = ParameterRuleType.USER_REGISTER)
     @ApiOperation("用户注册")
     @PostMapping("/register")
     public Result<UserVO> register(@RequestBody UserDTO userDTO){
-        if(userDTO.getLoginName() == null || userDTO.getUserName() == null || userDTO.getPassword() == null){
-            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
-        }
+//        if(userDTO.getLoginName() == null || userDTO.getUserName() == null || userDTO.getPassword() == null){
+//            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
+//        }
         //TODO 邀请码校验
         userService.insertUser(userDTO);
 //        this.login(userDTO);
@@ -58,12 +59,10 @@ public class UserController {
      * @param userDTO
      * @return
      */
+    @ParameterCheck(rule = ParameterRuleType.USER_LOGIN)
     @ApiOperation("用户登录")
     @PostMapping("/login")
     public Result<UserVO> login(@RequestBody UserDTO userDTO){
-        if(userDTO.getLoginName() == null || userDTO.getPassword() == null){
-            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
-        }
         User user = userService.login(userDTO);
 
         //登录成功，生成jwt令牌
@@ -117,6 +116,7 @@ public class UserController {
         return Result.success(userVO);
     }
 
+    @ParameterCheck(rule = ParameterRuleType.USER_MODIFY)
     /**
      * 修改用户信息
      * @param userDTO
@@ -126,11 +126,6 @@ public class UserController {
     @ApiOperation("修改用户信息")
     @PutMapping("/update")
     public Result<UserVO> updateUser(@RequestBody UserDTO userDTO){
-        //User中设置了部分字段即使为空也会更新，所以不需要判断userDTO中是否所有字段都为空
-        //如果没有传密码过来，则不更新密码//临时解决办法，后期通过校验的方式判断
-        if(userDTO.getPassword().equals("")){
-            userDTO.setPassword(null);
-        }
         userService.updateUser(userDTO);
         return Result.success();
     }

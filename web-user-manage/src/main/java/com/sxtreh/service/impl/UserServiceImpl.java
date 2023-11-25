@@ -77,12 +77,10 @@ public class UserServiceImpl implements UserService {
         if (user == null){
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
-
         //密码错误
         if(!password.equals(user.getPassword())){
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
-
         //账号被封禁
         if(user.getStatus() == StatusConstant.BANNED){
             throw new AccountBannedException(MessageConstant.ACCOUNT_BANNED);
@@ -97,6 +95,11 @@ public class UserServiceImpl implements UserService {
     public User info() {
         return userMapper.selectById(BaseContext.getCurrentId());
     }
+
+    /**
+     * 更新用户信息
+     * @param userDTO
+     */
 
     @Override
     public void updateUser(UserDTO userDTO) {

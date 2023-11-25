@@ -1,10 +1,13 @@
 package com.sxtreh.controller;
 
+import com.sxtreh.annotation.ParameterCheck;
 import com.sxtreh.annotation.RequireLogin;
 import com.sxtreh.constant.MessageConstant;
 import com.sxtreh.dto.UserFileDTO;
 import com.sxtreh.entity.UserFile;
-import com.sxtreh.exception.ParameterMissingException;
+import com.sxtreh.enumeration.ParameterRuleType;
+import com.sxtreh.exception.DataNotExistException;
+import com.sxtreh.exception.ParameterErrorException;
 import com.sxtreh.result.Result;
 import com.sxtreh.service.NetDiskService;
 import com.sxtreh.vo.UserFileVO;
@@ -32,15 +35,13 @@ public class NetDiskController {
     /**
      * 创建目录
      *
-     * @param userFileDTO
-     * @return
+     * @param userFileDTO 新增用户目录参数
+     * @return 成功
      */
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_CATALOG_SAVE)
     @RequireLogin
     @PostMapping("files")
     public Result<UserFileVO> saveCatalog(@RequestBody UserFileDTO userFileDTO) {
-        if (userFileDTO.getFilePid() == null || userFileDTO.getFileName() == null) {
-            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
-        }
         netDiskService.saveCatalog(userFileDTO);
         return Result.success();
     }
@@ -48,15 +49,13 @@ public class NetDiskController {
     /**
      * 删除文件
      *
-     * @param userFileDTO
-     * @return
+     * @param userFileDTO 删除文件的ID
+     * @return 成功
      */
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_DELETE)
     @RequireLogin
     @DeleteMapping("/files")
     public Result<UserFileVO> deleteFile(@RequestBody UserFileDTO userFileDTO) {
-        if (userFileDTO.getFileId() == null) {
-            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
-        }
         netDiskService.deleteFile(userFileDTO.getFileId());
         return Result.success();
     }
@@ -67,15 +66,11 @@ public class NetDiskController {
      * @param userFileDTO
      * @return
      */
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_MODIFY)
     @RequireLogin
     @PutMapping("/files")
     public Result<UserFileVO> modifyFile(@RequestBody UserFileDTO userFileDTO) {
-        if (userFileDTO.getFileId() == null) {
-            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
-        }
-        if (!(userFileDTO.getFilePid().equals(null) && userFileDTO.getFileName().equals(null))) {
-            netDiskService.modifyFile(userFileDTO);
-        }
+        netDiskService.modifyFile(userFileDTO);
         return Result.success();
     }
 
@@ -85,6 +80,8 @@ public class NetDiskController {
      * @param catalogId
      * @return 目录文件 和 子文件
      */
+
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_LIST)
     @RequireLogin
     @GetMapping("/files/{catalogId}")
     public Result<UserFileVO> listFile(@PathVariable("catalogId") Long catalogId) {
@@ -97,7 +94,7 @@ public class NetDiskController {
                 return Result.success(userFileVO);
             }
         }
-        return Result.error(MessageConstant.UNKNOWN_ERROR);
+        throw new DataNotExistException(MessageConstant.DATA_NOT_EXIST);
     }
 
     /**
@@ -112,10 +109,13 @@ public class NetDiskController {
      * @return
      */
 
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_UPLOAD)
     @RequireLogin
     @PostMapping("/files/upload")
     public Result<UserFileVO> uploadFile(MultipartFile file, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks) {
-
+        if (chunkIndex >= chunks || chunkIndex < 0) {
+            throw new ParameterErrorException(MessageConstant.PARAMETER_ERROR);
+        }
         netDiskService.uploadFile(file, transFileId, fileMD5, catalogId, chunkIndex, chunks);
         return Result.success();
     }
@@ -125,16 +125,26 @@ public class NetDiskController {
      *
      * @param ids
      * @return
-     * @throws FileNotFoundException
      */
 
-    //TODO 返回下载链接而不是直接返回文件，这样方便分享文件等操作（实际前端是不会写接收代码T^T）。同时可能限流负载均衡等操作更简单？
+    //TODO 返回下载链接而不是直接返回文件，这样方便分享文件等操作（实际是不会写前端接收代码T^T）。同时可能限流负载均衡等操作更简单？
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_DOWNLOAD)
     @RequireLogin
     @GetMapping("/files/download")
-    public ResponseEntity<InputStreamResource> downloadFiles(@RequestParam List<Long> ids) throws FileNotFoundException {
+    public ResponseEntity<InputStreamResource> downloadFiles(@RequestParam List<Long> ids) {
         List<String> filePaths = netDiskService.downloadFiles(ids);
+        //如果没有找到文件
+        if (filePaths.isEmpty()) throw new DataNotExistException(MessageConstant.DATA_NOT_EXIST);
+        //找到了返回数据流
         File file = new File(filePaths.get(0));
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+
+        InputStreamResource resource;
+        try {
+            resource = new InputStreamResource(new FileInputStream(file));
+        } catch (FileNotFoundException e) {
+            //路径位置文件被其他方式删了！！
+            throw new DataNotExistException(MessageConstant.DATA_NOT_EXIST);
+        }
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment;filename=" + file.getName())
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)

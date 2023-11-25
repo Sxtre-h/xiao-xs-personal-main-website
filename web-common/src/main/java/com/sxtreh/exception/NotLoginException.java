@@ -1,6 +1,6 @@
 package com.sxtreh.exception;
 
-public class NotLoginException extends BaseException{
+public class NotLoginException extends RequestException {
     public NotLoginException() {
     }
     public NotLoginException(String msg) {
