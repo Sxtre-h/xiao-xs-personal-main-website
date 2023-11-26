@@ -25,6 +25,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.List;
 
+/**
+ * 网盘功能：文件CRUD、上传、下载
+ */
 @Slf4j
 @RestController
 @RequestMapping("/netdisk")
