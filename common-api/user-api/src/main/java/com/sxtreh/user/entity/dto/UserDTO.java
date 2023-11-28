@@ -1,7 +1,9 @@
 package com.sxtreh.user.entity.dto;
 
 
+import lombok.Data;
 
+@Data
 public class UserDTO {
     //注册码
     String registerCode;
