@@ -6,19 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 笔记表格列对象
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class NoteDTO {
-    Long noteId;
-
+public class NoteColDTO {
     Long catalogId;
 
-    String noteName;
-
-    JSONObject noteBody;
-
-    Integer noteOrder;
-
+    String noteColName;
 }

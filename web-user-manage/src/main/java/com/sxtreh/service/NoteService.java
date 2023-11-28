@@ -1,5 +1,7 @@
 package com.sxtreh.service;
 
+import com.sxtreh.bo.NoteBO;
+import com.sxtreh.dto.NoteColDTO;
 import com.sxtreh.dto.NoteDTO;
 import com.sxtreh.entity.Note;
 
@@ -12,7 +14,15 @@ public interface NoteService {
 
     void modifyNote(NoteDTO noteDTO);
 
-    List<Note> listNote();
+    List<NoteBO> listNote();
 
-    List<Note> listNoteByCatalogId(Integer catalogId);
+    List<NoteBO> listNoteByCatalogId(Integer catalogId);
+
+    void saveNoteCol(Long catalogId);
+
+    void modifyNoteColNames(Long catalogId, List<String> colNames);
+
+    void deleteNoteCol(NoteColDTO noteColDTO);
+
+    void swapNoteOrder(Long myId, Long theOtherId);
 }

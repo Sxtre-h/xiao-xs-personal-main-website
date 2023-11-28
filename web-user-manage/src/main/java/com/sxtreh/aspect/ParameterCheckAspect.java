@@ -2,10 +2,7 @@ package com.sxtreh.aspect;
 
 import com.sxtreh.annotation.ParameterCheck;
 import com.sxtreh.constant.MessageConstant;
-import com.sxtreh.dto.NoteCatalogDTO;
-import com.sxtreh.dto.NoteDTO;
-import com.sxtreh.dto.UserDTO;
-import com.sxtreh.dto.UserFileDTO;
+import com.sxtreh.dto.*;
 import com.sxtreh.enumeration.ParameterRuleType;
 import com.sxtreh.exception.ParameterErrorException;
 import lombok.extern.slf4j.Slf4j;
@@ -89,23 +86,43 @@ public class ParameterCheckAspect {
                 NoteDTO noteDTO = (NoteDTO) entity;
                 if (noteDTO.getCatalogId() != null
                         && (noteDTO.getNoteName() != null && noteDTO.getNoteName().matches(noteNameRegex))
-                        && (noteDTO.getNoteBody() != null && noteDTO.getNoteBody().matches(noteBodyRegex)))
+                        && (noteDTO.getNoteBody() == null || noteDTO.getNoteBody().toString().matches(noteBodyRegex)))
+//                        && (noteDTO.getNoteBody() != null && noteDTO.getNoteBody().toString().matches(noteBodyRegex)))
                     return;
                 //没有Note类noteId字段，不会传进去，不用置空
+            }
+            case NOTE_SAVE_COL -> {
+                NoteColDTO noteDTO = (NoteColDTO) entity;
+                if (noteDTO.getCatalogId() != null)
+                    return;
             }
             case NOTE_MODIFY -> {
                 NoteDTO noteDTO = (NoteDTO) entity;
                 if (noteDTO.getNoteId() != null
                         && (noteDTO.getNoteName() != null && noteDTO.getNoteName().matches(noteNameRegex))
-                        && (noteDTO.getNoteBody() != null && noteDTO.getNoteBody().matches(noteBodyRegex))) {
+                        && (noteDTO.getNoteBody() == null || noteDTO.getNoteBody().toString().matches(noteBodyRegex))) {
+//                        && (noteDTO.getNoteBody() != null && noteDTO.getNoteBody().toString().matches(noteBodyRegex))) {
                     //暂时不支持移动笔记位置
                     noteDTO.setCatalogId(null);
                     return;
                 }
             }
+            case NOTE_COLS_MODIFY -> {
+                //要求所有对象都不为空
+                for (Object arg : args) {
+                    if (arg == null) throw new ParameterErrorException(MessageConstant.PARAMETER_ERROR);
+                }
+                return;
+            }
             case NOTE_DELETE -> {
                 NoteDTO noteDTO = (NoteDTO) entity;
                 if (noteDTO.getNoteId() != null) return;
+            }
+            case NOTE_DELETE_COL -> {
+                NoteColDTO noteColDTO = (NoteColDTO) entity;
+                if (noteColDTO.getCatalogId() != null && noteColDTO.getNoteColName().matches(noteBodyRegex)) {
+                    return;
+                }
             }
             //case NOTE_CATALOG_LIST -> {}
             case NOTE_CATALOG_SAVE -> {
@@ -133,7 +150,7 @@ public class ParameterCheckAspect {
             case NET_DISK_CATALOG_SAVE -> {
                 UserFileDTO userFileDTO = (UserFileDTO) entity;
                 if (userFileDTO.getFilePid() != null
-                        && (userFileDTO.getFileName() != null && userFileDTO.getFileName().matches(fileNameRegex))){
+                        && (userFileDTO.getFileName() != null && userFileDTO.getFileName().matches(fileNameRegex))) {
                     userFileDTO.setFileId(null);
 //                    userFileDTO.setFileSize(null);
 //                    userFileDTO.setFileType(null);
@@ -151,7 +168,7 @@ public class ParameterCheckAspect {
                     return;
                 }
             }
-            case NET_DISK_FILE_UPLOAD, NET_DISK_FILE_LIST, NET_DISK_FILE_DOWNLOAD -> {
+            case ALL_NOT_NULL, NET_DISK_FILE_UPLOAD, NET_DISK_FILE_LIST, NET_DISK_FILE_DOWNLOAD -> {
                 //要求所有对象都不为空
                 for (Object arg : args) {
                     if (arg == null) throw new ParameterErrorException(MessageConstant.PARAMETER_ERROR);

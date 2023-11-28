@@ -28,7 +28,7 @@ public class NoteCatalogServiceImpl implements NoteCatalogService {
     @Override
     public void saveCatalog(NoteCatalogDTO noteCatalogDTO) {
         //对非零级目录,需要验证父目录是否存在
-        if (!noteCatalogDTO.getCatalogLevel().equals("0")) {
+        if (!noteCatalogDTO.getCatalogLevel().equals(0)) {
             LambdaQueryWrapper<NoteCatalog> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(NoteCatalog::getId, noteCatalogDTO.getParentCatalogId())
                     .eq(NoteCatalog::getUserId, BaseContext.getCurrentId());

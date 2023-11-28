@@ -1,5 +1,6 @@
 package com.sxtreh.vo;
 
+import com.sxtreh.bo.NoteBO;
 import com.sxtreh.entity.Note;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +25,6 @@ public class NoteVO {
 
     Integer totals;
 
-    List<Note> notes;
+    List<NoteBO> notes;
 
 }

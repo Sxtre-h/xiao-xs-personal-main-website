@@ -1,6 +1,7 @@
 package com.sxtreh.enumeration;
 
 public enum ParameterRuleType {
+    ALL_NOT_NULL,
     //用户参数规则
     USER_REGISTER,
     USER_LOGIN,
@@ -13,8 +14,11 @@ public enum ParameterRuleType {
     NOTE_CATALOG_LIST,
 
     NOTE_SAVE,
+    NOTE_SAVE_COL,
     NOTE_DELETE,
+    NOTE_DELETE_COL,
     NOTE_MODIFY,
+    NOTE_COLS_MODIFY,
     NOTE_LIST,
 
     //网盘参数规则
