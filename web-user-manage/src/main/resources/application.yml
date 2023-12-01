@@ -20,9 +20,15 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 10000MB
-      max-request-size: 10000MB
+      max-file-size: ${sxtreh.multipart.max-file-size}
+      max-request-size: ${sxtreh.multipart.max-request-size}
 
+  mail:
+    host: ${sxtreh.mail.host}
+    username: ${sxtreh.mail.username}
+    password: ${sxtreh.mail.password}
+    from: ${sxtreh.mail.from}
+    to: ${sxtreh.mail.to}
 
 mybatis-plus:
   #mapper配置文件
@@ -36,24 +42,27 @@ logging:
   level:
     com:
       sxtreh:
-        mapper: debug
-        service: info
-        controller: info
+        mapper: info
+        service: warn
+        controller: warn
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      file-name-pattern: sxtreh-data-%i-%d{yyyy-MM-dd}-.log.gz
+  file:
+    name: sxtreh-data.log
+#    path: \Logs\
+  pattern:
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} {%thread} %-5level %logger{36} - %msg%n'
+  charset:
+    file: UTF-8
+
 
 sxtreh:
   jwt:
     # 设置jwt签名加密时使用的秘钥
     user-secret-key: sxtreh
     # 设置jwt过期时间
-    user-ttl: 720000000
+    user-ttl: ${sxtreh.jwt.user-ttl}
     # 设置前端传递过来的令牌名称
     user-token-name: token
-
-#jwt:
-#  # 设置jwt签名加密时使用的秘钥
-#  user-secret-key: ${sxtreh.jwt.user-secret-key}
-#  # 设置jwt过期时间
-#  user-ttl: ${sxtreh.jwt.user-ttl}
-#  # 设置前端传递过来的令牌名称
-#  user-token-name: ${sxtreh.jwt.user-token-name}
-

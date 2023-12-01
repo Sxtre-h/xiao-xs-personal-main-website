@@ -1,3 +1,6 @@
+#禁止发布
+#禁止发布
+#禁止发布
 sxtreh:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -13,5 +16,18 @@ sxtreh:
       #    password: 497852139
     database: 0
 
+  multipart:
+    max-file-size: 1000MB
+    max-request-size: 1000MB
 
+  jwt:
+    #一天过期
+    user-ttl: 86400000
+
+  mail:
+    host: smtp.qq.com
+    username: 123456@qq.com
+    password: 123456
+    from: 123@qq.com
+    to: 123456@qq.com
 

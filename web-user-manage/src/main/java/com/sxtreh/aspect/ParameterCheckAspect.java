@@ -21,6 +21,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ParameterCheckAspect {
     //参数格式匹配
+    private static final String registerCodeRegex = "^.{6}$";
+    private static final String shareCodeRegex = "^.{8}$";
     private static final String loginNameRegex = "^.{6,20}$";
     private static final String userNameRegex = "^.{1,20}$";
     private static final String passwordRegex = "^.{6,30}$";
@@ -50,14 +52,12 @@ public class ParameterCheckAspect {
             //用户参数校验
             case USER_REGISTER -> {
                 UserDTO userDTO = (UserDTO) entity;
-                if (userDTO.getUserName() != null
-                        && userDTO.getUserName().matches(userNameRegex)
-                        && userDTO.getLoginName() != null
-                        && userDTO.getLoginName().matches(loginNameRegex)
-                        && userDTO.getPassword() != null
-                        && userDTO.getPassword().matches(passwordRegex)
+                if (userDTO.getUserName() != null && userDTO.getUserName().matches(userNameRegex)
+                        && userDTO.getLoginName() != null && userDTO.getLoginName().matches(loginNameRegex)
+                        && userDTO.getPassword() != null && userDTO.getPassword().matches(passwordRegex)
                         && (userDTO.getProfile() == null || userDTO.getProfile().matches(userProfileRegex))
-                        && (userDTO.getAvatar() == null || userDTO.getAvatar().matches(userAvatarRegex)))
+                        && (userDTO.getAvatar() == null || userDTO.getAvatar().matches(userAvatarRegex))
+                        && (userDTO.getRegisterCode() != null && userDTO.getRegisterCode().matches(registerCodeRegex)))
                     return;
             }
             case USER_LOGIN -> {
@@ -165,6 +165,19 @@ public class ParameterCheckAspect {
                 UserFileDTO userFileDTO = (UserFileDTO) entity;
                 if (userFileDTO.getFileId() != null
                         && (userFileDTO.getFileName() == null || userFileDTO.getFileName().matches(fileNameRegex))) {
+                    return;
+                }
+            }
+            case NET_DISK_FILE_SHARE -> {
+                UserFileDTO userFileDTO = (UserFileDTO) entity;
+                if (userFileDTO.getFileId() != null) {
+                    return;
+                }
+            }
+            case NET_DISK_GET_SHARED_FILES -> {
+                UserFileDTO userFileDTO = (UserFileDTO) entity;
+                if (userFileDTO.getShareCode() != null && userFileDTO.getShareCode().matches(shareCodeRegex)
+                        && userFileDTO.getFilePid() != null) {
                     return;
                 }
             }

@@ -12,4 +12,6 @@ public interface UserService {
      void updateUser(UserDTO userDTO);
 
      void insertUser(UserDTO userDTO);
+
+    String applyRegisterCode();
 }

@@ -18,4 +18,8 @@ public interface NetDiskService {
     void uploadFile(MultipartFile file, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks);
 
     List<String> downloadFiles(List<Long> ids);
+
+    String shareFiles(Long fileId);
+
+    void getSharedFiles(UserFileDTO userFileDTO);
 }

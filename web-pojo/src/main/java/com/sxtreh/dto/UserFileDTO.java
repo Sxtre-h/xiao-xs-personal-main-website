@@ -16,6 +16,9 @@ public class UserFileDTO {
     Long filePid;
 
     String fileName;
+
+    String shareCode;
+
 //这两字段没用过，删了！
 //    Long fileSize;
 //

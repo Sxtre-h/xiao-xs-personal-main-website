@@ -20,6 +20,7 @@ import com.sxtreh.service.NoteService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ public class NoteServiceImpl implements NoteService {
     @Autowired
     private NoteCatalogMapper noteCatalogMapper;
 
+    @Transactional()
     @Override
     public void saveNote(NoteDTO noteDTO) {
         //如果插入的目录不存在或者不是自己的目录，请求非法！非法请求也可当作不存在处理
@@ -71,6 +73,7 @@ public class NoteServiceImpl implements NoteService {
         noteMapper.insert(note);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void saveNoteCol(Long catalogId) {
         //拿到该目录下所有笔记
@@ -105,6 +108,7 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
+    @Transactional()
     @Override
     public void deleteNote(Long noteId) {
         Note deleteNote = noteMapper.selectById(noteId);
@@ -132,6 +136,7 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
+    @Transactional()
     @Override
     public void deleteNoteCol(NoteColDTO noteColDTO) {
         //取目录下所有笔记
@@ -166,6 +171,7 @@ public class NoteServiceImpl implements NoteService {
         }
     }
 
+
     @Override
     public void modifyNote(NoteDTO noteDTO) {
         Note note = new Note();
@@ -174,13 +180,13 @@ public class NoteServiceImpl implements NoteService {
             String str = noteDTO.getNoteBody().toString();
             note.setNoteBody(str);
         }
-        //TODO 目录排序
         LambdaQueryWrapper<Note> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(Note::getId, noteDTO.getNoteId())
                 .eq(Note::getUserId, BaseContext.getCurrentId());
         noteMapper.update(note, queryWrapper);
     }
 
+    @Transactional()
     @Override
     public void swapNoteOrder(Long myId, Long theOtherId) {
         //查询

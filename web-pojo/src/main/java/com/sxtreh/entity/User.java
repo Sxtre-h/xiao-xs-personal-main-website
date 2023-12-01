@@ -44,6 +44,9 @@ public class User {
     //用户网盘总空间
     Long userSpaceTotal;
 
+    //用户邀请人ID
+    Long inviteUserId;
+
     //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     LocalDateTime gmtCreate;
 

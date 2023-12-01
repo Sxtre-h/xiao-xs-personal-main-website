@@ -5,6 +5,8 @@ package com.sxtreh.constant;
  */
 public class MessageConstant {
     public static final String ACCOUNT_NOT_FOUND = "账号不存在";
+    public static final String REGISTER_CODE_ERROR = "无效的邀请码";
+    public static final String SHARED_CODE_ERROR = "分享码无效";
     public static final String ALREADY_EXISTS = "用户已存在";
     public static final String PASSWORD_ERROR = "密码错误";
     public static final String ACCOUNT_BANNED = "账号被封禁";

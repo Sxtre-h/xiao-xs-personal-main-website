@@ -13,6 +13,7 @@ import com.sxtreh.service.NetDiskService;
 import com.sxtreh.vo.UserFileVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -43,7 +44,7 @@ public class NetDiskController {
      */
     @ParameterCheck(rule = ParameterRuleType.NET_DISK_CATALOG_SAVE)
     @RequireLogin
-    @PostMapping("files")
+    @PostMapping("/files")
     public Result<UserFileVO> saveCatalog(@RequestBody UserFileDTO userFileDTO) {
         netDiskService.saveCatalog(userFileDTO);
         return Result.success();
@@ -153,5 +154,26 @@ public class NetDiskController {
                 .contentType(MediaType.APPLICATION_OCTET_STREAM)
                 .contentLength(file.length())
                 .body(resource);
+    }
+
+    /**
+     * 分享文件，返回分享码
+     * @param userFileDTO
+     * @return
+     */
+    @Cacheable(cacheNames = "fileShare", key = "#userFileDTO.fileId")//保证一个文件只有一个分享码
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_SHARE)
+    @RequireLogin
+    @PostMapping("/files/shares")
+    public Result shareFiles(@RequestBody UserFileDTO userFileDTO){
+        String shareCode = netDiskService.shareFiles(userFileDTO.getFileId());
+        return Result.success(shareCode);
+    }
+    @ParameterCheck(rule = ParameterRuleType.NET_DISK_GET_SHARED_FILES)
+    @RequireLogin
+    @PutMapping("/files/shares")
+    public Result getSharedFiles(@RequestBody UserFileDTO userFileDTO){
+        netDiskService.getSharedFiles(userFileDTO);
+        return Result.success();
     }
 }

@@ -15,6 +15,7 @@ import com.sxtreh.service.NoteCatalogService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -52,6 +53,7 @@ public class NoteCatalogServiceImpl implements NoteCatalogService {
         noteCatalogMapper.insert(noteCatalog);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteCatalog(Long catalogId) {
         LambdaQueryWrapper<NoteCatalog> catalogQueryWrapper = new LambdaQueryWrapper<>();
@@ -78,7 +80,7 @@ public class NoteCatalogServiceImpl implements NoteCatalogService {
     public void modifyCatalog(NoteCatalogDTO noteCatalogDTO) {
         NoteCatalog noteCatalog = new NoteCatalog();
         BeanUtils.copyProperties(noteCatalogDTO, noteCatalog);
-        //TODO 目录排序
+
         LambdaQueryWrapper<NoteCatalog> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(NoteCatalog::getId, noteCatalogDTO.getCatalogId())
                 .eq(NoteCatalog::getUserId, BaseContext.getCurrentId());

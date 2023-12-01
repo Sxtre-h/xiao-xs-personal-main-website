@@ -1,32 +1,38 @@
 package com.sxtreh.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.sxtreh.bo.SharedFileBO;
 import com.sxtreh.bo.UploadingFileBO;
 import com.sxtreh.constant.FileStorageLocationConstant;
 import com.sxtreh.constant.FileTypeConstant;
 import com.sxtreh.constant.MessageConstant;
+import com.sxtreh.constant.TimeConstant;
 import com.sxtreh.context.BaseContext;
 import com.sxtreh.dto.UserFileDTO;
 import com.sxtreh.entity.*;
 import com.sxtreh.exception.DataNotExistException;
 import com.sxtreh.exception.FileUploadErrorException;
+import com.sxtreh.exception.ParameterErrorException;
 import com.sxtreh.mapper.FileInfoMapper;
 import com.sxtreh.mapper.NetDiskMapper;
 import com.sxtreh.mapper.UserMapper;
 import com.sxtreh.result.UploadResult;
 import com.sxtreh.service.NetDiskService;
+import com.sxtreh.utils.SecurityCodeCreator;
 import com.sxtreh.utils.UploadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -59,6 +65,7 @@ public class NetDiskServiceImpl implements NetDiskService {
         netDiskMapper.insert(userFile);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void deleteFile(Long fileId) {
 
@@ -91,8 +98,6 @@ public class NetDiskServiceImpl implements NetDiskService {
             user.setUserSpaceRemain(user.getUserSpaceRemain() + userFile.getFileSize());
             userMapper.updateById(user);
         }
-
-
     }
 
     @Override
@@ -136,6 +141,7 @@ public class NetDiskServiceImpl implements NetDiskService {
         return userFiles;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public void uploadFile(MultipartFile file, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks) {
         //判定父目录合法性
@@ -185,9 +191,11 @@ public class NetDiskServiceImpl implements NetDiskService {
             if (result.getCode().equals(0)) {
                 return;
             }
-            //文件上传完毕,清理缓存
-            Set keys = redisTemplate.keys("file_" + BaseContext.getCurrentId() + "_" + transFileId);
-            redisTemplate.delete(keys);
+            //文件上传完毕,清理正在上传的文件和分片
+            Set chunkKeys = redisTemplate.keys("file_" + BaseContext.getCurrentId() + "_" + transFileId + "*");
+            redisTemplate.delete(chunkKeys);
+            Set fileKeys = redisTemplate.keys("uploadingFile_" + BaseContext.getCurrentId() + "_" + transFileId);
+            redisTemplate.delete(fileKeys);
             // 文件信息表添加文件
             fileInfo = FileInfo.builder()
                     .fileName(result.getFileName())//UUID
@@ -229,5 +237,74 @@ public class NetDiskServiceImpl implements NetDiskService {
             paths.add(file.getFileUrl());
         }
         return paths;
+    }
+
+    @Override
+    public String shareFiles(Long fileId) {
+        //校验分享用户是否有该文件
+        if (netDiskMapper.selectById(fileId).getUserId() != BaseContext.getCurrentId()) {
+            throw new DataNotExistException(MessageConstant.DATA_NOT_EXIST);
+        }
+        SharedFileBO sharedFileBO = new SharedFileBO(fileId, BaseContext.getCurrentId());
+        String shareCode = SecurityCodeCreator.getCode(8);
+        redisTemplate.opsForValue().set(shareCode, sharedFileBO);
+        redisTemplate.expire(shareCode, TimeConstant.sharedCodeExpireTime, TimeUnit.DAYS);
+        return shareCode;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void getSharedFiles(UserFileDTO userFileDTO) {
+        //判定父目录合法性
+        UserFile fileParent = netDiskMapper.selectById(userFileDTO.getFilePid());
+        if (fileParent == null
+                || fileParent.getUserId() != BaseContext.getCurrentId()
+                || !fileParent.getFileType().equals(FileTypeConstant.CATALOG)) {
+            throw new DataNotExistException(MessageConstant.DATA_NOT_EXIST);
+        }
+        SharedFileBO sharedFileBO = (SharedFileBO) redisTemplate.opsForValue().get(userFileDTO.getShareCode());
+        if (sharedFileBO != null && sharedFileBO.getShareUserId() != null && sharedFileBO.getFileId() != null) {
+            if (!netDiskMapper.selectById(sharedFileBO.getFileId()).getUserId().equals(sharedFileBO.getShareUserId())) {
+                throw new ParameterErrorException(MessageConstant.SHARED_CODE_ERROR);
+            }
+            this.saveFiles(sharedFileBO.getFileId(), userFileDTO.getFilePid());
+        }
+    }
+
+    //保存一个目录中所有文件到用户网盘
+    private void saveFiles(Long fileId, Long filePid) {
+        UserFile sharedFile = netDiskMapper.selectById(fileId);
+        if (sharedFile == null) return;
+        //创建文件并保存
+        UserFile myFile = UserFile.builder()
+                .userId(BaseContext.getCurrentId())
+                .fileId(sharedFile.getFileId())
+                .filePid(filePid)
+                .fileName(sharedFile.getFileName())
+                .fileSize(sharedFile.getFileSize())
+                .fileType(sharedFile.getFileType())
+                .fileUrl(sharedFile.getFileUrl())
+                .build();
+        netDiskMapper.insertAndGetId(myFile);
+        //文件类型则更新文件信息表引用指针
+        if (sharedFile.getFileType().equals(FileTypeConstant.FILE)) {
+            fileInfoMapper.increasePointNumber(myFile.getFileId());
+            //TODO 后期优化成一条SQL，需要自定义update SQL  ，还有增加剩余空间校验，并开启事务
+            User user = userMapper.selectById(BaseContext.getCurrentId());
+            user.setUserSpaceRemain(user.getUserSpaceRemain()- myFile.getFileSize());
+            userMapper.updateById(user);
+        }
+        //目录类型则递归添加文件
+        else {
+            //复制目录下所有文件
+            LambdaQueryWrapper<UserFile> queryWrapper = new LambdaQueryWrapper<>();
+            queryWrapper.eq(UserFile::getFilePid, sharedFile.getId());
+            List<UserFile> sharedFiles = netDiskMapper.selectList(queryWrapper);
+            for(UserFile file:sharedFiles){
+                //将每个子文件保存到自己的目录下
+                saveFiles(file.getId(),myFile.getId());
+            }
+        }
+
     }
 }

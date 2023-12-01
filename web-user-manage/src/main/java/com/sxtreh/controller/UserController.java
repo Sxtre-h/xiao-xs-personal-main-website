@@ -16,6 +16,8 @@ import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -36,6 +38,19 @@ public class UserController {
     private JwtProperties jwtProperties;
 
     /**
+     * 用户申请邀请码
+     * @return
+     */
+    @RequireLogin
+    @GetMapping("/invites")
+    public Result<UserVO> applyRegisterCode(){
+        UserVO userVO = UserVO.builder()
+                .registerCode(userService.applyRegisterCode())
+                .build();
+        return Result.success(userVO);
+    }
+
+    /**
      * 用户注册
      * @param userDTO
      * @return
@@ -45,10 +60,6 @@ public class UserController {
     @ApiOperation("用户注册")
     @PostMapping("/register")
     public Result<UserVO> register(@RequestBody UserDTO userDTO){
-//        if(userDTO.getLoginName() == null || userDTO.getUserName() == null || userDTO.getPassword() == null){
-//            throw new ParameterMissingException(MessageConstant.PARAMETER_MISSING);
-//        }
-        //TODO 邀请码校验
         userService.insertUser(userDTO);
 //        this.login(userDTO);
         return Result.success();
@@ -116,12 +127,12 @@ public class UserController {
         return Result.success(userVO);
     }
 
-    @ParameterCheck(rule = ParameterRuleType.USER_MODIFY)
     /**
      * 修改用户信息
      * @param userDTO
      * @return
      */
+    @ParameterCheck(rule = ParameterRuleType.USER_MODIFY)
     @RequireLogin
     @ApiOperation("修改用户信息")
     @PutMapping("/update")
