@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler
     public Result exceptionHandler(RequestException requestException){
-        log.info(requestException.getMessage());
+        log.error(requestException.getMessage());
         return Result.error(requestException.getMessage());
     }
 
@@ -32,7 +32,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler
     public Result exceptionHandler(ProcedureException procedureException){
-        log.info(procedureException.getMessage());
+        log.error(procedureException.getMessage());
         return Result.error(MessageConstant.PROCEDURE_ERROR);
     }
 
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler
     public Result exceptionHandler(HttpMessageNotReadableException ex){
-        log.info("你忘了写请求参数！：" + ex.getMessage());
+        log.error("你忘了写请求参数！：" + ex.getMessage());
         return Result.error("你忘了写请求参数或者参数有语法错误！：" + ex.getMessage());
     }
 

@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
      *
      * @param userDTO
      */
-    @Transactional()
+    @Transactional
     @Override
     public void insertUser(UserDTO userDTO) {
         Long invitationUserId = (Long) redisTemplate.opsForValue().get(userDTO.getRegisterCode());

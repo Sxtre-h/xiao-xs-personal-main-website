@@ -3,7 +3,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: prod
   main:
     allow-circular-references: true
   datasource:
@@ -12,11 +12,11 @@ spring:
       url: jdbc:mysql://${sxtreh.datasource.host}:${sxtreh.datasource.port}/${sxtreh.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
       username: ${sxtreh.datasource.username}
       password: ${sxtreh.datasource.password}
-
   redis:
     host: ${sxtreh.redis.host}
     port: ${sxtreh.redis.port}
     database: ${sxtreh.redis.database}
+    password: ${sxtreh.redis.password}
 
   servlet:
     multipart:
@@ -29,6 +29,20 @@ spring:
     password: ${sxtreh.mail.password}
     from: ${sxtreh.mail.from}
     to: ${sxtreh.mail.to}
+    port: 465
+    #解决25端口不开放问题，使用465端口并使用ssl加密
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+          auth: true
+          starttls:
+            enable: true
+            required: true
 
 mybatis-plus:
   #mapper配置文件
@@ -51,7 +65,7 @@ logging:
       file-name-pattern: sxtreh-data-%i-%d{yyyy-MM-dd}-.log.gz
   file:
     name: sxtreh-data.log
-#    path: \Logs\
+    path: ./Logs/
   pattern:
     file: '%d{yyyy-MM-dd HH:mm:ss.SSS} {%thread} %-5level %logger{36} - %msg%n'
   charset:
@@ -66,3 +80,10 @@ sxtreh:
     user-ttl: ${sxtreh.jwt.user-ttl}
     # 设置前端传递过来的令牌名称
     user-token-name: token
+
+netdisk:
+  file:
+    path:
+      file: ${sxtreh.netdisk.file.path.file}
+      tmp:  ${sxtreh.netdisk.file.path.tmp}
+      avatar: ${sxtreh.netdisk.file.path.avatar}
