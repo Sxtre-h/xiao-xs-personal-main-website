@@ -1,0 +1,17 @@
+sxtreh:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: 192.168.1.109
+    port: 3306
+    database: web
+    username: adminx
+    password: 497852139
+
+  redis:
+    host: 192.168.1.109
+    port: 6379
+      #    password: 497852139
+    database: 0
+
+
+
