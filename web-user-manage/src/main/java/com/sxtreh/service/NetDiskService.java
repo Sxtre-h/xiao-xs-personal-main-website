@@ -15,7 +15,7 @@ public interface NetDiskService {
 
     List<UserFile> listFile(Long catalogId);
 
-    void uploadFile(MultipartFile file, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks);
+    void uploadFile(MultipartFile file, String fileOriginName, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks);
 
     List<String> downloadFiles(List<Long> ids);
 

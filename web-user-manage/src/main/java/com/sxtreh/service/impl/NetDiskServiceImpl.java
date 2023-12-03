@@ -143,7 +143,7 @@ public class NetDiskServiceImpl implements NetDiskService {
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public void uploadFile(MultipartFile file, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks) {
+    public void uploadFile(MultipartFile file, String fileOriginName, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks) {
         //判定父目录合法性
         UserFile fileParent = netDiskMapper.selectById(catalogId);
         if (fileParent == null
@@ -156,9 +156,8 @@ public class NetDiskServiceImpl implements NetDiskService {
         if (user.getUserSpaceRemain() < file.getSize()) {
             throw new RuntimeException("空间不足");
         }
-        //TODO 验证MD5
-//        FileInfo fileInfo = fileInfoMapper.selectByMD5(fileMD5);
-        FileInfo fileInfo = fileInfoMapper.selectByMD5("-1");
+        //验证MD5
+        FileInfo fileInfo = fileInfoMapper.selectByMD5(fileMD5);
         //不存在相同文件则上传
         if (fileInfo == null) {
             UploadResult result;
@@ -206,23 +205,29 @@ public class NetDiskServiceImpl implements NetDiskService {
                     .build();
             fileInfoMapper.insertAndGetId(fileInfo);
         } else {
-            //已经存在相同文件则更新文件信息表中文件的引用值
-            fileInfoMapper.increasePointNumber(fileInfo.getId());
+            //最后一片
+            if (chunkIndex == chunks - 1) {
+                //已经存在相同文件则更新文件信息表中文件的引用值
+                fileInfoMapper.increasePointNumber(fileInfo.getId());
+            }
         }
-        //用户文件表中添加文件索引
-        UserFile userFile = UserFile.builder()
-                .userId(BaseContext.getCurrentId())
-                .fileId(fileInfo.getId())
-                .filePid(catalogId)
-                .fileName(file.getOriginalFilename())//上传的文件名, 不是getName();
-                .fileSize(fileInfo.getFileSize())
-                .fileType(FileTypeConstant.FILE)
-                .fileUrl(fileInfo.getFileUrl())
-                .build();
-        netDiskMapper.insert(userFile);
-
-        user.setUserSpaceRemain(user.getUserSpaceRemain() - file.getSize());
-        userMapper.updateById(user);
+        //最后一片
+        if (chunkIndex == chunks - 1) {
+            //用户文件表中添加文件索引
+            UserFile userFile = UserFile.builder()
+                    .userId(BaseContext.getCurrentId())
+                    .fileId(fileInfo.getId())
+                    .filePid(catalogId)
+                    .fileName(fileOriginName)
+                    .fileSize(fileInfo.getFileSize())
+                    .fileType(FileTypeConstant.FILE)
+                    .fileUrl(fileInfo.getFileUrl())
+                    .build();
+            netDiskMapper.insert(userFile);
+            //更新用户剩余网盘空间
+            user.setUserSpaceRemain(user.getUserSpaceRemain() - fileInfo.getFileSize());
+            userMapper.updateById(user);
+        }
     }
 
     @Override
@@ -291,7 +296,7 @@ public class NetDiskServiceImpl implements NetDiskService {
             fileInfoMapper.increasePointNumber(myFile.getFileId());
             //TODO 后期优化成一条SQL，需要自定义update SQL  ，还有增加剩余空间校验，并开启事务
             User user = userMapper.selectById(BaseContext.getCurrentId());
-            user.setUserSpaceRemain(user.getUserSpaceRemain()- myFile.getFileSize());
+            user.setUserSpaceRemain(user.getUserSpaceRemain() - myFile.getFileSize());
             userMapper.updateById(user);
         }
         //目录类型则递归添加文件
@@ -300,9 +305,9 @@ public class NetDiskServiceImpl implements NetDiskService {
             LambdaQueryWrapper<UserFile> queryWrapper = new LambdaQueryWrapper<>();
             queryWrapper.eq(UserFile::getFilePid, sharedFile.getId());
             List<UserFile> sharedFiles = netDiskMapper.selectList(queryWrapper);
-            for(UserFile file:sharedFiles){
+            for (UserFile file : sharedFiles) {
                 //将每个子文件保存到自己的目录下
-                saveFiles(file.getId(),myFile.getId());
+                saveFiles(file.getId(), myFile.getId());
             }
         }
 

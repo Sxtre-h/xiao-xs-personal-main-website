@@ -17,8 +17,8 @@ sxtreh:
     database: 0
 
   multipart:
-    max-file-size: 1000MB
-    max-request-size: 1000MB
+    max-file-size: 10MB
+    max-request-size: 100MB
 
   jwt:
     #一天过期

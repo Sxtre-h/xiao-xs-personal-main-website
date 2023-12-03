@@ -116,11 +116,11 @@ public class NetDiskController {
     @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_UPLOAD)
     @RequireLogin
     @PostMapping("/files/upload")
-    public Result<UserFileVO> uploadFile(MultipartFile file, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks) {
+    public Result<UserFileVO> uploadFile(MultipartFile file, String fileOriginName, Long transFileId, String fileMD5, Long catalogId, Integer chunkIndex, Integer chunks) {
         if (chunkIndex >= chunks || chunkIndex < 0) {
             throw new ParameterErrorException(MessageConstant.PARAMETER_ERROR);
         }
-        netDiskService.uploadFile(file, transFileId, fileMD5, catalogId, chunkIndex, chunks);
+        netDiskService.uploadFile(file, fileOriginName, transFileId, fileMD5, catalogId, chunkIndex, chunks);
         return Result.success();
     }
 
