@@ -1,0 +1,85 @@
+server:
+  port: 8081
+
+spring:
+  profiles:
+    active: prod
+  main:
+    allow-circular-references: true
+  application:
+    name: admin-service #服务名称
+  cloud:
+    nacos:
+      server-addr: ${sxtreh.cloud.nacos.server-addr} #nacos服务地址
+      discovery:
+        cluster-name: ${sxtreh.cloud.nacos.discovery.cluster-name}
+        namespace: ${sxtreh.cloud.nacos.discovery.namespace} #命名空间
+  datasource:
+    druid:
+      driver-class-name: ${sxtreh.datasource.driver-class-name}
+      url: jdbc:mysql://${sxtreh.datasource.host}:${sxtreh.datasource.port}/${sxtreh.datasource.database}?serverTimezone=Asia/Shanghai&useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true
+      username: ${sxtreh.datasource.username}
+      password: ${sxtreh.datasource.password}
+  redis:
+    host: ${sxtreh.redis.host}
+    port: ${sxtreh.redis.port}
+    database: ${sxtreh.redis.database}
+#    password: ${sxtreh.redis.password}
+
+  mail:
+    host: ${sxtreh.mail.host}
+    username: ${sxtreh.mail.username}
+    password: ${sxtreh.mail.password}
+    from: ${sxtreh.mail.from}
+    to: ${sxtreh.mail.to}
+    port: 465
+    #解决25端口不开放问题，使用465端口并使用ssl加密
+    properties:
+      mail:
+        smtp:
+          ssl:
+            enable: true
+          socketFactory:
+            port: 465
+            class: javax.net.ssl.SSLSocketFactory
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+mybatis-plus:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.sxtreh.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+
+logging:
+  level:
+    com:
+      sxtreh:
+        mapper: info
+        service: warn
+        controller: warn
+  logback:
+    rollingpolicy:
+      max-file-size: 10MB
+      file-name-pattern: sxtreh-data-%i-%d{yyyy-MM-dd}-.log.gz
+  file:
+    name: sxtreh-data.log
+    path: ${sxtreh.logging.file.path}
+  pattern:
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS} {%thread} %-5level %logger{36} - %msg%n'
+  charset:
+    file: UTF-8
+
+
+sxtreh:
+  jwt:
+    # 设置jwt签名加密时使用的秘钥
+    user-secret-key: ${sxtreh.jwt.user-secret-key}
+    # 设置jwt过期时间
+    user-ttl: ${sxtreh.jwt.user-ttl}
+    # 设置前端传递过来的令牌名称
+    user-token-name: token

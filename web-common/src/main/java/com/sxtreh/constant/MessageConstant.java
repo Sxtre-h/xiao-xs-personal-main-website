@@ -16,6 +16,7 @@ public class MessageConstant {
     public static final String GMT_ERROR = "更新创建/修改时间异常，此处异常可能是实体对象中缺少gmt属性";
     public static final String UPLOAD_ERROR = "上传失败";
     public static final String UPLOAD_MERGE_ERROR = "文件分片合并失败";
+    public static final String NetDiskSpaceNotEnoughException = "用户空间不足";
     public static final String PROCEDURE_ERROR = "服务器开小差了";
     public static final String UNKNOWN_ERROR = "未知错误";
 }

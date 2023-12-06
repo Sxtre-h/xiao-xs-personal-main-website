@@ -19,6 +19,11 @@
         <module>web-common</module>
         <module>web-pojo</module>
         <module>common-api</module>
+        <module>gateway-service</module>
+        <module>user-service</module>
+        <module>net-disk-service</module>
+        <module>note-service</module>
+        <module>admin-service</module>
     </modules>
     <properties>
         <java.version>17</java.version>
@@ -34,6 +39,12 @@
         <jjwt>0.9.1</jjwt>
         <jaxb-api>2.3.1</jaxb-api>
         <poi>3.16</poi>
+        <nacos-discovery>2.2.9.RELEASE</nacos-discovery>
+        <nacos-config>2.2.9.RELEASE</nacos-config>
+        <feign>2.2.2.RELEASE</feign>
+        <cloud-dependencies>2.2.5.RELEASE</cloud-dependencies>
+        <spring-cloud.version>2021.0.7</spring-cloud.version>
+
     </properties>
     <dependencyManagement>
         <dependencies>
@@ -119,29 +130,46 @@
                 <artifactId>poi-ooxml</artifactId>
                 <version>${poi}</version>
             </dependency>
-            <!--微信支付-->
-            <dependency>
-                <groupId>com.github.wechatpay-apiv3</groupId>
-                <artifactId>wechatpay-apache-httpclient</artifactId>
-                <version>0.4.8</version>
-            </dependency>
 
             <!-- 微服务组件引入 开始 -->
             <!-- nacos 注册中心 -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
-                <version>2.2.9.RELEASE</version>
+                <version>${nacos-discovery}</version>
             </dependency>
 
             <!-- nacos 配置中心 -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
-                <version>2.2.9.RELEASE</version>
+                <version>${nacos-config}</version>
             </dependency>
 
             <!-- 微服务组件引入 结束 -->
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-starter-openfeign</artifactId>
+                <version>${feign}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${cloud-dependencies}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <!--                <version>2021.0.7</version>-->
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
 
         </dependencies>
     </dependencyManagement>

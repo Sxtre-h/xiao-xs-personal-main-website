@@ -15,7 +15,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.*;
 
-//TODO 缓存功能出大问题了，会绕过用户校验，不能直接加， 不重构项目如何解决？ 拆分成微服务？写网关？
 @Slf4j
 @RestController
 @RequestMapping("/admin")

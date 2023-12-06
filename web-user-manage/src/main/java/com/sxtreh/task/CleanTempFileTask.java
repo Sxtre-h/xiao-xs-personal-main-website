@@ -1,6 +1,7 @@
 package com.sxtreh.task;
 
 import com.sxtreh.bo.UploadingFileBO;
+import com.sxtreh.constant.FileStorageLocationConstant;
 import com.sxtreh.utils.UploadUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,10 @@ import java.util.Set;
 public class CleanTempFileTask {
     @Autowired
     RedisTemplate redisTemplate;
+    @Autowired
+    private FileStorageLocationConstant fileStorageLocationConstant;
     private String fileKey = "uploadingFile_*";
+
 
     @Scheduled(cron = "0 0 0/1 * * ? ")
     public void cleanTimeOutFile() {
@@ -31,7 +35,7 @@ public class CleanTempFileTask {
                 if (o.getRecentUpdateTime().compareTo(LocalDateTime.now().plusSeconds(-10L)) < 0) {
                     log.info("文件{}超时,自动清理", o.getFileId());
                     //清理临时文件
-                    UploadUtil.cleanTempFile(o.getUserId(), o.getFileId());
+                    UploadUtil.cleanTempFile(o.getUserId(), o.getFileId(), fileStorageLocationConstant.SPLIT, fileStorageLocationConstant.TEMP_PATH);
                     //清理文件缓存
                     redisTemplate.delete(fileKey);
                     //清理文件分片缓存

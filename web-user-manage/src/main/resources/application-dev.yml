@@ -31,3 +31,16 @@ sxtreh:
     from: 123@qq.com
     to: 123456@qq.com
 
+  logging:
+    file:
+      path: ".\\Logs\\"
+
+  #windows
+  netdisk:
+    file:
+      path:
+        file: "D:\\Project\\res\\files\\"
+        temp: "D:\\Project\\res\\temp\\"
+        avatar: "D:\\Project\\res\\avatars\\"
+        split: "\\"
+

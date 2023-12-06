@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: net-disk-service
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: 127.0.0.1:8848
+      discovery:
+        cluster-name: LOCAL
+        namespace: d26e3a73-1ced-491e-9e0b-14a5c2de6f5c #命名空间
+      config:
+        file-extension: yaml

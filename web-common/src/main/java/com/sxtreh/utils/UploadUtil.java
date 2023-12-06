@@ -1,26 +1,19 @@
 package com.sxtreh.utils;
 
-import ch.qos.logback.core.util.FileUtil;
-import com.sxtreh.constant.FileStorageLocationConstant;
 import com.sxtreh.constant.MessageConstant;
 import com.sxtreh.context.BaseContext;
 import com.sxtreh.exception.FileUploadErrorException;
-import com.sxtreh.result.Result;
 import com.sxtreh.result.UploadResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.FileCopyUtils;
-import org.springframework.util.FileSystemUtils;
-import org.springframework.web.bind.annotation.PostMapping;
+
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.naming.Context;
 import java.io.File;
-import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.List;
-import java.util.Random;
+
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.UUID;
 
 @Slf4j
@@ -37,13 +30,12 @@ public class UploadUtil {
      * @return 文件本地存储路径
      * @throws Exception
      */
-    public static UploadResult upload(Long fileId, String storagePath, MultipartFile file, Integer chunkIndex, Integer chunks) throws Exception {
+    public static UploadResult upload(Long fileId, String storagePath, MultipartFile file, Integer chunkIndex, Integer chunks, String split, String tempPath) throws Exception {
         UploadResult uploadResult = new UploadResult();
         uploadResult.setCode(0);
         //分片上传文件
         //临时文件目录
-//        String tempDir = FileStorageLocationConstant.TEMP_PATH + BaseContext.getCurrentId() + fileId + "\\";//windows
-        String tempDir = FileStorageLocationConstant.TEMP_PATH + BaseContext.getCurrentId() + fileId + "/";//linux
+        String tempDir = tempPath + BaseContext.getCurrentId() + fileId + split;
         File dir = new File(tempDir);
         if (!dir.exists()) {
             dir.mkdir();
@@ -65,6 +57,13 @@ public class UploadUtil {
         String newFileName = UUID.randomUUID().toString();
         String fileUrl = storagePath + newFileName;
         File[] files = dir.listFiles();
+        //files默认随机排序，需要手动排序，否则组装时会使文件错误。
+        Arrays.sort(files, new Comparator<File>() {
+            @Override
+            public int compare(File o1, File o2) {
+                return Integer.valueOf(o1.getName())-Integer.valueOf(o2.getName());
+            }
+        });
         if (files.length == chunks) {
             log.info("开始合并");
             File targetFile = new File(fileUrl);
@@ -83,7 +82,7 @@ public class UploadUtil {
                         }
                     } catch (Exception e) {
                         log.error(e.getMessage());
-                        throw new FileUploadErrorException(MessageConstant.UPLOAD_ERROR);
+                        throw new FileUploadErrorException(MessageConstant.UPLOAD_MERGE_ERROR);
                     } finally {
                         if (readFile != null)
                             readFile.close();
@@ -100,7 +99,7 @@ public class UploadUtil {
                 dir.delete();
             } catch (Exception e) {
                 log.error(e.getMessage());
-                throw new FileUploadErrorException(MessageConstant.UPLOAD_ERROR);
+                throw new FileUploadErrorException(MessageConstant.UPLOAD_MERGE_ERROR);
             } finally {
                 if (writeFile != null) {
                     writeFile.close();
@@ -112,9 +111,8 @@ public class UploadUtil {
     /**
      * 清理临时文件
      */
-    public static void cleanTempFile(Long userId, Long fileId){
-//        String tempDir = FileStorageLocationConstant.TEMP_PATH + userId + fileId + "\\";
-        String tempDir = FileStorageLocationConstant.TEMP_PATH + userId + fileId + "/";
+    public static void cleanTempFile(Long userId, Long fileId, String split, String tempPath){
+        String tempDir = tempPath + userId + fileId + split;
         File dir = new File(tempDir);
         if (!dir.exists()) {
             return;

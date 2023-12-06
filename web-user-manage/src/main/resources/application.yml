@@ -65,7 +65,7 @@ logging:
       file-name-pattern: sxtreh-data-%i-%d{yyyy-MM-dd}-.log.gz
   file:
     name: sxtreh-data.log
-    path: ./Logs/
+    path: ${sxtreh.logging.file.path}
   pattern:
     file: '%d{yyyy-MM-dd HH:mm:ss.SSS} {%thread} %-5level %logger{36} - %msg%n'
   charset:
@@ -81,9 +81,10 @@ sxtreh:
     # 设置前端传递过来的令牌名称
     user-token-name: token
 
-netdisk:
-  file:
-    path:
-      file: ${sxtreh.netdisk.file.path.file}
-      tmp:  ${sxtreh.netdisk.file.path.tmp}
-      avatar: ${sxtreh.netdisk.file.path.avatar}
+  netdisk:
+    file:
+      path:
+        file: ${sxtreh.netdisk.file.path.file}
+        temp:  ${sxtreh.netdisk.file.path.temp}
+        avatar: ${sxtreh.netdisk.file.path.avatar}
+        split: ${sxtreh.netdisk.file.path.split}

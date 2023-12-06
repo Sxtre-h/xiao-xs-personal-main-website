@@ -45,6 +45,8 @@ public class NetDiskServiceImpl implements NetDiskService {
     private UserMapper userMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private FileStorageLocationConstant fileStorageLocationConstant;
 
     @Override
     public void saveCatalog(UserFileDTO userFileDTO) {
@@ -180,7 +182,7 @@ public class NetDiskServiceImpl implements NetDiskService {
             }
             //不存在则继续上传
             try {
-                result = UploadUtil.upload(transFileId, FileStorageLocationConstant.FILE_PATH, file, chunkIndex, chunks);
+                result = UploadUtil.upload(transFileId, fileStorageLocationConstant.FILE_PATH, file, chunkIndex, chunks, fileStorageLocationConstant.SPLIT, fileStorageLocationConstant.TEMP_PATH);
                 //redis记录已上传分片
                 redisTemplate.opsForValue().set(chunkKey, true);
             } catch (Exception e) {
@@ -294,7 +296,7 @@ public class NetDiskServiceImpl implements NetDiskService {
         //文件类型则更新文件信息表引用指针
         if (sharedFile.getFileType().equals(FileTypeConstant.FILE)) {
             fileInfoMapper.increasePointNumber(myFile.getFileId());
-            //TODO 后期优化成一条SQL，需要自定义update SQL  ，还有增加剩余空间校验，并开启事务
+            //后期优化成一条SQL，需要自定义update SQL  ，还有增加剩余空间校验，并开启事务  微服务中已优化√
             User user = userMapper.selectById(BaseContext.getCurrentId());
             user.setUserSpaceRemain(user.getUserSpaceRemain() - myFile.getFileSize());
             userMapper.updateById(user);

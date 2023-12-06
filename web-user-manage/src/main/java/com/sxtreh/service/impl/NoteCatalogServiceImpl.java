@@ -48,7 +48,7 @@ public class NoteCatalogServiceImpl implements NoteCatalogService {
 
         noteCatalog.setUserId(BaseContext.getCurrentId());
         noteCatalog.setStatus(StatusConstant.UNSHARED);
-        noteCatalog.setCatalogOrder(1);//TODO 临时填充
+        noteCatalog.setCatalogOrder(1);//临时填充
 
         noteCatalogMapper.insert(noteCatalog);
     }

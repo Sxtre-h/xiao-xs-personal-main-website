@@ -1,4 +1,13 @@
+#禁止发布
+#禁止发布
+#禁止发布
 sxtreh:
+  cloud:
+    nacos:
+      server-addr: localhost:8848 #nacos服务地址
+      discovery:
+        cluster-name: LOCAL
+        namespace: d26e3a73-1ced-491e-9e0b-14a5c2de6f5c #命名空间
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     host: 192.168.1.109
@@ -13,5 +22,20 @@ sxtreh:
       #    password: 497852139
     database: 0
 
+  logging:
+    file:
+      path: ".\\Logs\\"
+
+  jwt:
+    #一天过期
+    user-ttl: 86400000
+    user-secret-key: sxtreh
+
+  rabbitmq:
+    host: 192.168.1.109
+    port: 5672
+    virtual-host: /
+    username: adminx
+    password: 497852139
 
 
