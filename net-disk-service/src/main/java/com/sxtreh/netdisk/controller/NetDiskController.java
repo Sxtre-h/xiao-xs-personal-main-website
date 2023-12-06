@@ -137,7 +137,7 @@ public class NetDiskController {
      * @return
      */
 
-    //TODO 返回下载链接而不是直接返回文件，这样方便分享文件等操作（实际是不会写前端接收代码T^T）。同时可能限流负载均衡等操作更简单？
+    //TODO 返回下载链接而不是直接返回文件，这样方便分享文件等操作。同时可能限流负载均衡等操作更简单？
     @ParameterCheck(rule = ParameterRuleType.NET_DISK_FILE_DOWNLOAD)
     @GetMapping("/files/download")
     public ResponseEntity<InputStreamResource> downloadFiles(@RequestParam List<Long> ids) {
